@@ -82,7 +82,7 @@ const displayVideo = (details) => {
     const minutes = Math.floor((detail.others.posted_date % 3600) / 60);
     const seconds = detail.others.posted_date % 60;
 
-    const formattedTime = `${hours}hr ${minutes}m ${seconds}s`;
+    const formattedTime = `${hours}hrs ${minutes}min ${seconds}sec ago`;
     console.log(detail);
     const videoContainer = document.createElement("div");
     videoContainer.innerHTML = `
