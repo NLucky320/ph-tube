@@ -10,6 +10,12 @@ const buttonContainer = document.getElementById("btn-container");
 const cardContainer = document.getElementById("card-container");
 let selectedCategory = 1000;
 const errorElement = document.getElementById("error-element");
+let sortByView = false;
+const sortButton = document.getElementById("sort-btn");
+sortButton.addEventListener("click", () => {
+  sortByView = true;
+  fetchDataByCategory(selectedCategory, sortByView);
+});
 
 const fetchCategories = async () => {
   const response = await fetch(
@@ -18,7 +24,7 @@ const fetchCategories = async () => {
   const data = await response.json();
   const categories = data.data;
   displayButton(categories);
-  fetchDataByCategory(selectedCategory);
+  fetchDataByCategory(selectedCategory, sortByView);
 };
 
 const displayButton = (categories) => {
@@ -37,7 +43,7 @@ const displayButton = (categories) => {
   });
 };
 
-const fetchDataByCategory = async (categoryId) => {
+const fetchDataByCategory = async (categoryId, sortByView) => {
   //   console.log(categoryId);
   selectedCategory = categoryId;
   const response = await fetch(
@@ -50,6 +56,17 @@ const fetchDataByCategory = async (categoryId) => {
   } else {
     errorElement.classList.add("hidden");
   }
+  if (sortByView) {
+    details.sort((b, a) => {
+      const totalViewStringFirst = a.others?.views;
+      const totalViewStringSecond = b.others?.views;
+      const totalViewStringFirstNumber =
+        parseFloat(totalViewStringFirst.replace("k", "")) || 0;
+      const totalViewStringSecondNumber =
+        parseFloat(totalViewStringSecond.replace("k", "")) || 0;
+      return totalViewStringFirstNumber - totalViewStringSecondNumber;
+    });
+  }
   console.log(details);
   displayVideo(details);
 };
@@ -60,6 +77,12 @@ const displayVideo = (details) => {
     if (detail.authors[0].verified) {
       verifiedBadge = `<img class="w-6 h-6" src="./verified.svg" alt="">`;
     }
+    const postedDate = new Date(detail.others.posted_date);
+    const hours = Math.floor(detail.others.posted_date / 3600);
+    const minutes = Math.floor((detail.others.posted_date % 3600) / 60);
+    const seconds = detail.others.posted_date % 60;
+
+    const formattedTime = `${hours}hr ${minutes}m ${seconds}s`;
     console.log(detail);
     const videoContainer = document.createElement("div");
     videoContainer.innerHTML = `
@@ -69,9 +92,7 @@ const displayVideo = (details) => {
           <img class="w-full" src="${
             detail.thumbnail || ""
           }" alt="Video Thumbnail" />
-          <h6 class="absolute bottom-[40%] right-12">${
-            detail.duration || "0 hr"
-          }</h6>
+          <h6 class="absolute bottom-[40%] right-12">${formattedTime}</h6>
         </figure>
         <div class="card-body">
           <div class="flex space-x-4 justify-start items-start">
@@ -100,4 +121,4 @@ const displayVideo = (details) => {
 };
 
 fetchCategories();
-fetchDataByCategory(selectedCategory);
+fetchDataByCategory(selectedCategory, sortByView);
